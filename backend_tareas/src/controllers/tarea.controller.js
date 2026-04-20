@@ -1,107 +1,98 @@
-import * as tareaModel from '../models/tarea.model.js';
+import db from '../../models/index.cjs';
 
-export const obtenerTodas = (req, res) => {
-    try {
-        const tareas = tareaModel.obtenerTodas();
-        const formato = req.query.formato;
+const { Tarea, Persona, Tag } = db;
 
-        if (formato === 'text') {
-            let texto = 'Lista de Tareas:\n\n';
-            tareas.forEach(t => {
-                const estado = t.completada ? 'Tarea completada: true' : 'Tarea completada: false';
-                texto += `${t.id} - ${t.titulo}. ${estado} \n`;
-            });
-            return res.send(texto); 
-        }
-
-        res.json({ success: true, data: tareas, count: tareas.length });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al obtener las tareas', error: error.message });
-    }
-};
-
-export const obtenerPorId = (req, res) => {
+// 1. OBTENER TODAS LAS TAREAS
+export const obtenerTodas = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido. Debe ser un número' });
-    
-    const tarea = tareaModel.obtenerPorId(id);
-    if (!tarea) return res.status(404).json({ success: false, message: `Tarea con ID ${id} no encontrada` });
-    
-    res.json({ success: true, data: tarea });
+    const tareas = await Tarea.findAll({
+      include: [
+        { model: Persona, as: 'autor', attributes: ['id', 'nombre', 'email'] },
+        { model: Tag, as: 'etiquetas', attributes: ['id', 'nombre'], through: { attributes: [] } }
+      ]
+    });
+    res.json({ success: true, data: tareas });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error al obtener la tarea', error: error.message });
+    res.status(500).json({ success: false, message: 'Error al obtener tareas', error: error.message });
   }
 };
 
-export const crear = (req, res) => {
+// 2. CREAR TAREA
+export const crear = async (req, res) => {
   try {
-    const { titulo, completada } = req.body;
-    if (!titulo) return res.status(400).json({ success: false, message: 'El campo "titulo" es requerido' });
+    const { titulo, descripcion, completada, personaId } = req.body;
     
-    const nuevaTarea = tareaModel.crear({ titulo, completada });
-    res.status(201).json({ success: true, message: 'Tarea creada exitosamente', data: nuevaTarea });
+    if (!titulo || !personaId) {
+      return res.status(400).json({ success: false, message: 'El título y el personaId son obligatorios' });
+    }
+
+    const nuevaTarea = await Tarea.create({ titulo, descripcion, completada, personaId });
+    res.status(201).json({ success: true, data: nuevaTarea });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error al crear la tarea', error: error.message });
   }
 };
 
-export const actualizarCompleta = (req, res) => {
+// 3. ACTUALIZAR TAREA
+export const actualizar = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    const { titulo, completada } = req.body;
+    const { id } = req.params;
+    const tarea = await Tarea.findByPk(id);
     
-    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido. Debe ser un número' });
-    if (!titulo) return res.status(400).json({ success: false, message: 'El campo "titulo" es requerido' });
-    
-    const tareaActualizada = tareaModel.actualizarCompleta(id, { titulo, completada });
-    if (!tareaActualizada) return res.status(404).json({ success: false, message: `Tarea con ID ${id} no encontrada` });
-    
-    res.json({ success: true, message: 'Tarea actualizada completamente', data: tareaActualizada });
+    if (!tarea) return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
+
+    await tarea.update(req.body);
+    res.json({ success: true, message: 'Tarea actualizada', data: tarea });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error al actualizar la tarea', error: error.message });
+    res.status(500).json({ success: false, message: 'Error al actualizar', error: error.message });
   }
 };
 
-export const actualizarParcial = (req, res) => {
+// 4. ELIMINAR TAREA
+export const eliminar = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    const datosParciales = req.body;
-    
-    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido. Debe ser un número' });
-    if (Object.keys(datosParciales).length === 0) return res.status(400).json({ success: false, message: 'Debe enviar al menos un campo para actualizar' });
-    
-    const tareaActualizada = tareaModel.actualizarParcial(id, datosParciales);
-    if (!tareaActualizada) return res.status(404).json({ success: false, message: `Tarea con ID ${id} no encontrada` });
-    
-    res.json({ success: true, message: 'Tarea actualizada parcialmente', data: tareaActualizada });
+    const { id } = req.params;
+    const eliminados = await Tarea.destroy({ where: { id } });
+
+    if (eliminados === 0) return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
+
+    res.json({ success: true, message: 'Tarea eliminada permanentemente' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error al actualizar la tarea', error: error.message });
+    res.status(500).json({ success: false, message: 'Error al eliminar', error: error.message });
   }
 };
 
-export const eliminar = (req, res) => {
+
+// 5. ASOCIAR TAREA CON TAG
+export const agregarTag = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido. Debe ser un número' });
-    
-    const tareaEliminada = tareaModel.eliminar(id);
-    if (!tareaEliminada) return res.status(404).json({ success: false, message: `Tarea con ID ${id} no encontrada` });
-    
-    res.json({ success: true, message: 'Tarea eliminada exitosamente', data: tareaEliminada });
+    const { id } = req.params;
+    const { tagId } = req.body;
+
+    const tarea = await Tarea.findByPk(id);
+    const tag = await Tag.findByPk(tagId);
+
+    if (!tarea || !tag) return res.status(404).json({ success: false, message: 'Tarea o Tag no encontrado' });
+
+    await tarea.addEtiqueta(tag); 
+    res.json({ success: true, message: 'Tag asociado a la tarea con éxito' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error al eliminar la tarea', error: error.message });
+    res.status(500).json({ success: false, message: 'Error al asociar', error: error.message });
   }
 };
 
-export const buscarTareas = (req, res) => {
-    try {
-        const termino = req.query.q;
-        if (!termino) return res.status(400).json({ success: false, message: 'El parametro de busqueda "q" es requerido' });
+// 6. BUSCAR TAREAS POR TAG
+export const tareasPorTag = async (req, res) => {
+  try {
+    const { tagId } = req.params;
+    const tag = await Tag.findByPk(tagId, {
+      include: [{ model: Tarea, as: 'tareas' }]
+    });
 
-        const resultados = tareaModel.buscarPorTitulo(termino);
-        res.json({ success: true, data: resultados, count: resultados.length });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Error al buscar tareas', error: error.message });
-    }
+    if (!tag) return res.status(404).json({ success: false, message: 'Tag no encontrado' });
+    
+    res.json({ success: true, data: tag.tareas });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error en la búsqueda', error: error.message });
+  }
 };

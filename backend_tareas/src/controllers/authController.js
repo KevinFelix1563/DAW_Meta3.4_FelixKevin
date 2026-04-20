@@ -1,51 +1,47 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import db from '../../models/index.cjs'; // Importamos la base de datos
 
-/**
- * Generar un token CSRF seguro
- */
-export const generarTokenCSRF = () => {
-  return crypto.randomBytes(32).toString('hex');
-};
+const { Persona } = db;
 
-/**
- * Login - Generar tokens JWT y CSRF
- */
-export const login = (req, res) => {
+export const generarTokenCSRF = () => crypto.randomBytes(32).toString('hex');
+
+export const login = async (req, res) => { // Ahora es async
   try {
     const { email } = req.body;
     
     if (!email || email.trim() === '') {
       return res.status(400).json({ error: 'El email es requerido' });
     }
+
+    // BUSCAMOS AL USUARIO EN DB
+    const usuario = await Persona.findOne({ 
+      where: { email: email.trim(), activo: true } 
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ error: 'Usuario no encontrado o cuenta inactiva' });
+    }
     
-    // Generar token CSRF
     const csrfToken = generarTokenCSRF();
     
-    // Crear payload para JWT
+    // Usamos los datos reales de MariaDB para el Token
     const payload = {
-      id: 1, 
-      email: email.trim(),
+      id: usuario.id,
+      email: usuario.email,
       apiKey: process.env.API_KEY,
       csrfToken: csrfToken
     };
     
-    // Generar token JWT
-    const tokenJWT = jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
+    const tokenJWT = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
     
-    // Configurar cookie HTTP-Only para el token JWT
     res.cookie('jwt_token', tokenJWT, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', 
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: parseInt(process.env.COOKIE_MAX_AGE)
     });
     
-    // Configurar cookie para el token CSRF 
     res.cookie('csrf_token', csrfToken, {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -54,15 +50,12 @@ export const login = (req, res) => {
     
     res.json({
       mensaje: 'Login exitoso',
-      usuario: {
-        id: payload.id,
-        email: payload.email
-      },
+      usuario: { id: payload.id, email: payload.email },
       csrfToken: csrfToken 
     });
     
   } catch (error) {
-    console.error('Error en login:', error);
+    console.error("ERROR REAL EN EL LOGIN:", error);
     res.status(500).json({ error: 'Error en el proceso de login' });
   }
 };

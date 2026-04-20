@@ -4,8 +4,11 @@ import cookieParser from 'cookie-parser'; // Importar cookie-parser
 import dotenv from 'dotenv'; // Importar dotenv
 
 import tareaRoutes from './routes/tarea.routes.js';
+import personaRoutes from './routes/persona.routes.js';
+import tagRoutes from './routes/tag.routes.js';
 import authRoutes from './routes/auth.routes.js'; // Importar las rutas de autenticacion
 import { verificarToken } from './middleware/auth.js'; // Importar middleware de autenticacion
+
 
 dotenv.config(); // Cargar las variables de nuestro archivo .env
 
@@ -62,4 +65,8 @@ app.use((err, req, res, next) => {
   });
 });
 
+
+app.use('/api/personas', personaRoutes);
+app.use('/api/tareas', tareaRoutes);
+app.use('/api/tags', tagRoutes);
 export default app;

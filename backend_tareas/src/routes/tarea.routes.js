@@ -3,12 +3,14 @@ import * as tareaController from '../controllers/tarea.controller.js';
 
 const router = express.Router();
 
+// Rutas CRUD básicas
 router.get('/', tareaController.obtenerTodas);
-router.get('/buscar', tareaController.buscarTareas);
-router.get('/:id', tareaController.obtenerPorId);
 router.post('/', tareaController.crear);
-router.put('/:id', tareaController.actualizarCompleta);
-router.patch('/:id', tareaController.actualizarParcial);
+router.put('/:id', tareaController.actualizar);
 router.delete('/:id', tareaController.eliminar);
+
+// Rutas de relaciones
+router.post('/:id/tags', tareaController.agregarTag);
+router.get('/tag/:tagId', tareaController.tareasPorTag);
 
 export default router;
