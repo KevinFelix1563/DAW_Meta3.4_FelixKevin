@@ -1,3 +1,6 @@
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import YAML from 'yaml';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser'; // Importar cookie-parser
@@ -13,6 +16,13 @@ import { verificarToken } from './middleware/auth.js'; // Importar middleware de
 dotenv.config(); // Cargar las variables de nuestro archivo .env
 
 const app = express();
+
+// Lee y parsea archivo yaml
+const file = fs.readFileSync('./swagger.yaml', 'utf8');
+const swaggerDocument = YAML.parse(file);
+
+//Monta la ruta de la documentación
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Para comunicacion entre server y cliente se usa CORS
 app.use(cors({
@@ -47,6 +57,11 @@ app.get('/', (req, res) => {
   });
 });
 
+// Rutas de modelos
+app.use('/api/personas', personaRoutes);
+app.use('/api/tareas', tareaRoutes);
+app.use('/api/tags', tagRoutes);
+
 // Middleware para manejar rutas no encontradas
 app.use((req, res) => {
   res.status(404).json({
@@ -66,7 +81,4 @@ app.use((err, req, res, next) => {
 });
 
 
-app.use('/api/personas', personaRoutes);
-app.use('/api/tareas', tareaRoutes);
-app.use('/api/tags', tagRoutes);
 export default app;

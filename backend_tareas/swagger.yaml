@@ -1,0 +1,285 @@
+openapi: 3.0.0
+info:
+  title: API Gestión de Tareas (MVC) - UABC
+  version: 1.0.0
+  description: Documentación oficial de la API.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de Desarrollo Local
+
+tags:
+  - name: Autenticación
+  - name: Personas
+  - name: Tareas
+  - name: Tags
+
+paths:
+  # ==========================================
+  # AUTENTICACIÓN
+  # ==========================================
+  /auth/login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  example: kevin@uabc.edu.mx
+      responses:
+        '200':
+          description: Login exitoso, devuelve JWT en cookie y Token CSRF en el body.
+        '401':
+          description: Credenciales inválidas
+
+  # ==========================================
+  # PERSONAS
+  # ==========================================
+  /personas/registro:
+    post:
+      tags: [Personas]
+      summary: Registrar un nuevo usuario
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonaInput'
+      responses:
+        '201':
+          description: Creado
+
+  /personas/{id}:
+    put:
+      tags: [Personas]
+      summary: Modificar un usuario
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonaInput'
+      responses:
+        '200':
+          description: Actualizado
+
+  /personas/{id}/estado:
+    patch:
+      tags: [Personas]
+      summary: Activar o desactivar usuario
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                activo:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Estado cambiado
+
+  /personas/{id}/tags:
+    get:
+      tags: [Personas]
+      summary: Obtener todos los tags usados por una persona
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Lista de tags
+
+  # ==========================================
+  # TAREAS
+  # ==========================================
+  /tareas:
+    get:
+      tags: [Tareas]
+      summary: Obtener todas las tareas del usuario logueado
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      responses:
+        '200':
+          description: Lista de tareas
+    post:
+      tags: [Tareas]
+      summary: Crear nueva tarea
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TareaInput'
+      responses:
+        '201':
+          description: Tarea creada
+
+  /tareas/{id}:
+    put:
+      tags: [Tareas]
+      summary: Actualizar tarea
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TareaInput'
+      responses:
+        '200':
+          description: Tarea actualizada
+    delete:
+      tags: [Tareas]
+      summary: Eliminar tarea
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Tarea eliminada
+
+  /tareas/{id}/tags:
+    post:
+      tags: [Tareas]
+      summary: Asociar un tag a una tarea
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tagId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Tag asociado
+
+  /tareas/tag/{tagId}:
+    get:
+      tags: [Tareas]
+      summary: Obtener tareas por ID de Tag
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      parameters:
+        - in: path
+          name: tagId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de tareas
+
+  # ==========================================
+  # TAGS
+  # ==========================================
+  /tags:
+    get:
+      tags: [Tags]
+      summary: Obtener todos los tags
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      responses:
+        '200':
+          description: Lista de tags
+
+  /tags/{id}/personas:
+    get:
+      tags: [Tags]
+      summary: Obtener personas por ID de Tag
+      security:
+        - ApiKeyAuth: []
+          CsrfAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Lista de personas
+
+components:
+  parameters:
+    IdParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+      description: ID principal
+  
+  schemas:
+    PersonaInput:
+      type: object
+      properties:
+        nombre:
+          type: string
+          example: "Kevin Sanchez"
+        email:
+          type: string
+          example: "kevin@uabc.edu.mx"
+    TareaInput:
+      type: object
+      properties:
+        titulo:
+          type: string
+          example: "Nueva Tarea"
+        descripcion:
+          type: string
+          example: "Descripción de prueba"
+        completada:
+          type: boolean
+          example: false
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    CsrfAuth:
+      type: apiKey
+      in: header
+      name: x-csrf-token
