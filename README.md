@@ -76,7 +76,6 @@ La API cuenta con documentación interactiva alojada de manera local. Para proba
 ---
 
 ## 📸 Evidencias de Ejecución
-
-* ![Login](login-exitoso.png) - Demostración de autenticación JWT.
-* ![Consulta Tarea - Etiqueta](02-relacion-nm.png) - Demostración de consulta de Tareas por Etiqueta, en este caso TagId=1 o Urgente.
-* ![Consulta Tarea - Etiqueta](03-swagger-ui.png) - Interfaz de documentación generada.
+![Demostración de autenticación JWT.](screenshots/01-login-exitoso.png)
+![Demostración de consulta de Tareas por Etiqueta, en este caso TagId=1 o Urgente.](screenshots/02-relacion-nm.png)
+![Interfaz de documentación generada.](screenshots/03-swagger-ui.png)
