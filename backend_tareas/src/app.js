@@ -18,7 +18,7 @@ dotenv.config(); // Cargar las variables de nuestro archivo .env
 const app = express();
 
 // Lee y parsea archivo yaml
-const file = fs.readFileSync('./swagger.yaml', 'utf8');
+const file = fs.readFileSync('../swagger.yaml', 'utf8');
 const swaggerDocument = YAML.parse(file);
 
 //Monta la ruta de la documentación
