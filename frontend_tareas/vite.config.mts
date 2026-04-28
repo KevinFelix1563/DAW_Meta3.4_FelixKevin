@@ -3,6 +3,7 @@ import Vue from '@vitejs/plugin-vue'
 import Fonts from 'unplugin-fonts/vite'
 import { defineConfig } from 'vite'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import fs from 'node:fs'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -45,6 +46,11 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 3000,
+    port: 3001,
+    // Configuracion HTTPS
+    https: {
+      key: fs.readFileSync('./key.pem'),
+      cert: fs.readFileSync('./cert.pem'),
+    },
   },
 })
