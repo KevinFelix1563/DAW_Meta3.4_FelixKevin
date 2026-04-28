@@ -1,10 +1,11 @@
+import dotenv from 'dotenv'; // Importar dotenv
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import YAML from 'yaml';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser'; // Importar cookie-parser
-import dotenv from 'dotenv'; // Importar dotenv
+
 
 import tareaRoutes from './routes/tarea.routes.js';
 import personaRoutes from './routes/persona.routes.js';
