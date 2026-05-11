@@ -13,7 +13,16 @@ module.exports = {
         type: Sequelize.STRING
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        unique: true
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false // No podemos tener usuarios sin contraseña
+      },
+      rol: {
+        type: Sequelize.STRING,
+        defaultValue: 'usuario' // Por defecto, todos son usuarios sin permisos
       },
       activo: {
         type: Sequelize.BOOLEAN
