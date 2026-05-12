@@ -95,30 +95,67 @@ Para asegurar la calidad y el cumplimiento estricto de la rúbrica, se desarroll
 
 A continuación, se presenta la evidencia en video de las pruebas End-to-End:
 
+# Evidencias del Sistema
+
 #### Panel de Administración (Gestión y Búsquedas)
 
-**1. Listar y Crear un Nuevo Usuario**
+##### 1. Listar y Crear un Nuevo Usuario
+
 Evidencia de la creación de un usuario desde el panel del Administrador:
-https://github.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/raw/main/frontend_tareas/test-results/admin-Panel-de-Administrac-bcacf--usuarios-y-crear-uno-nuevo-chromium/video.webm
 
-**2. Búsquedas Avanzadas (Admin)**
-Evidencia de consultas cruzadas en la base de datos (Ej. Búsqueda de tareas por etiquetas):
-https://github.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/raw/main/frontend_tareas/test-results/admin-Panel-de-Administrac-26281--búsquedas-avanzadas-Admin--chromium/video.webm
+<video width="800" controls>
+  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/admin-Panel-de-Administrac-bcacf--usuarios-y-crear-uno-nuevo-chromium/video.webm" type="video/webm">
+</video>
 
-**3. Eliminar un Usuario (Confirmación)**
+---
+
+##### 2. Búsquedas Avanzadas (Admin)
+
+Evidencia de consultas cruzadas en la base de datos (Ej. búsqueda de tareas por etiquetas):
+
+<video width="800" controls>
+  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/admin-Panel-de-Administrac-26281--b%C3%BAsquedas-avanzadas-Admin--chromium/video.webm" type="video/webm">
+</video>
+
+---
+
+##### 3. Eliminar un Usuario (Confirmación)
+
 Evidencia del borrado de un usuario aceptando el diálogo nativo de confirmación:
-https://github.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/raw/main/frontend_tareas/test-results/admin-Panel-de-Administrac-9152c-ario-confirmando-el-dialogo-chromium/video.webm
 
-#### Gestión de Tareas (Usuario Regular)
+<video width="800" controls>
+  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/admin-Panel-de-Administrac-9152c-ario-confirmando-el-dialogo-chromium/video.webm" type="video/webm">
+</video>
 
-**1. Crear una Nueva Tarea**
+---
+
+# Gestión de Tareas (Usuario Regular)
+
+##### 1. Crear una Nueva Tarea
+
 Evidencia de un usuario autenticado agregando exitosamente una tarea a su lista:
-https://github.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/raw/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-Bú-aebf2--Debe-crear-una-nueva-tarea-chromium/video.webm
 
-**2. Uso del Buscador por Etiquetas**
+<video width="800" controls>
+  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-B%C3%BA-aebf2--Debe-crear-una-nueva-tarea-chromium/video.webm" type="video/webm">
+</video>
+
+---
+
+##### 2. Uso del Buscador por Etiquetas
+
 Evidencia del filtrado en tiempo real de tareas usando múltiples etiquetas:
-https://github.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/raw/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-Bú-5f5b5-r-el-buscador-por-etiquetas-chromium/video.webm
 
-**3. Eliminar una Tarea**
+<video width="800" controls>
+  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-B%C3%BA-5f5b5-r-el-buscador-por-etiquetas-chromium/video.webm" type="video/webm">
+</video>
+
+---
+
+##### 3. Eliminar una Tarea
+
 Evidencia de la eliminación limpia de una tarea de la lista:
-https://github.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/raw/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-Bú-88750-be-poder-eliminar-una-tarea-chromium/video.webm
+
+<video width="800" controls>
+  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-B%C3%BA-88750-be-poder-eliminar-una-tarea-chromium/video.webm" type="video/webm">
+</video>
+```
