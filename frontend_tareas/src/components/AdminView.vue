@@ -53,13 +53,20 @@
                 </td>
                 <td class="text-center">
                   <v-btn 
-                    size="small" 
-                    variant="text" 
-                    :color="user.activo ? 'error' : 'success'"
+                    size="small" variant="text" color="blue" 
+                    icon="mdi-pencil" @click="abrirDialogoUsuario(user)" title="Editar">
+                  </v-btn>
+
+                  <v-btn 
+                    size="small" variant="text" :color="user.activo ? 'warning' : 'success'"
                     :icon="user.activo ? 'mdi-cancel' : 'mdi-check-circle'"
-                    @click="cambiarEstadoUsuario(user)"
-                    :title="user.activo ? 'Desactivar' : 'Activar'"
-                  ></v-btn>
+                    @click="cambiarEstadoUsuario(user)" :title="user.activo ? 'Desactivar' : 'Activar'">
+                  </v-btn>
+
+                  <v-btn 
+                    size="small" variant="text" color="error" 
+                    icon="mdi-delete" @click="eliminarUsuario(user.id)" title="Eliminar">
+                  </v-btn>
                 </td>
               </tr>
             </tbody>
@@ -154,11 +161,17 @@
 
     <v-dialog v-model="dialogoUsuario" max-width="500">
       <v-card>
-        <v-card-title>Nuevo Usuario</v-card-title>
+        <v-card-title>{{ esEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</v-card-title>
         <v-card-text>
           <v-text-field v-model="formUser.nombre" label="Nombre" variant="outlined" density="compact"></v-text-field>
           <v-text-field v-model="formUser.email" label="Email" type="email" variant="outlined" density="compact"></v-text-field>
-          <v-text-field v-model="formUser.password" label="Contraseña" type="password" variant="outlined" density="compact"></v-text-field>
+          <v-text-field 
+            v-model="formUser.password" 
+            :label="esEdicion ? 'Nueva Contraseña (dejar en blanco para mantener la actual)' : 'Contraseña'" 
+            type="password" 
+            variant="outlined" 
+            density="compact">
+          </v-text-field>
           <v-select v-model="formUser.rol" :items="['usuario', 'admin']" label="Rol" variant="outlined" density="compact"></v-select>
         </v-card-text>
         <v-card-actions>
@@ -173,16 +186,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { csrfToken } from '../store/auth.js' // Importamos el token de seguridad
+import { csrfToken } from '../store/auth.js'
 
 const API_URL = import.meta.env.VITE_API_URL
 const tab = ref('usuarios')
 
-// Estados de Datos
 const listaUsuarios = ref([])
 const listaTags = ref([])
 
-// Utilidad para fetch seguro
 const fetchSeguro = async (endpoint, method = 'GET', body = null) => {
   const options = {
     method,
@@ -198,13 +209,15 @@ const fetchSeguro = async (endpoint, method = 'GET', body = null) => {
   return await res.json()
 }
 
-// Logica de Usuarios
+// ==========================================
+// LÓGICA DE USUARIOS (CRUD COMPLETO)
+// ==========================================
 const cargarUsuarios = async () => {
   try {
-    const res = await fetchSeguro('/admin/usuarios')
-    listaUsuarios.value = res.data || res
+    const res = await fetchSeguro('/personas')
+    listaUsuarios.value = res.data || res 
   } catch (error) {
-    console.error(error)
+    console.error('Error al cargar usuarios:', error)
   }
 }
 
@@ -218,16 +231,29 @@ const cargarTags = async () => {
 }
 
 const dialogoUsuario = ref(false)
+const esEdicion = ref(false)
 const formUser = ref({ nombre: '', email: '', password: '', rol: 'usuario' })
 
-const abrirDialogoUsuario = () => {
-  formUser.value = { nombre: '', email: '', password: '', rol: 'usuario' }
+const abrirDialogoUsuario = (user = null) => {
+  if (user) {
+    esEdicion.value = true
+    formUser.value = { ...user, password: '' } // Password vacío para no sobreescribir si no lo cambia
+  } else {
+    esEdicion.value = false
+    formUser.value = { nombre: '', email: '', password: '', rol: 'usuario' }
+  }
   dialogoUsuario.value = true
 }
 
 const guardarUsuario = async () => {
   try {
-    await fetchSeguro('/admin/usuarios', 'POST', formUser.value)
+    if (esEdicion.value) {
+      const payload = { ...formUser.value }
+      if (!payload.password) delete payload.password 
+      await fetchSeguro(`/personas/${formUser.value.id}`, 'PUT', payload)
+    } else {
+      await fetchSeguro('/personas/registro', 'POST', formUser.value)
+    }
     dialogoUsuario.value = false
     cargarUsuarios()
   } catch (error) {
@@ -237,7 +263,6 @@ const guardarUsuario = async () => {
 
 const cambiarEstadoUsuario = async (user) => {
   try {
-    // Usamos el endpoint de la ruta de personas (protegida por admin)
     await fetchSeguro(`/personas/${user.id}/estado`, 'PATCH', { activo: !user.activo })
     cargarUsuarios()
   } catch (error) {
@@ -245,7 +270,19 @@ const cambiarEstadoUsuario = async (user) => {
   }
 }
 
-// Logica de Busquedas Avanzadas
+const eliminarUsuario = async (id) => {
+  if (!confirm('¿Estás seguro de que deseas eliminar este usuario permanentemente?')) return
+  try {
+    await fetchSeguro(`/personas/${id}`, 'DELETE')
+    cargarUsuarios()
+  } catch (error) {
+    alert('Error al eliminar usuario')
+  }
+}
+
+// ==========================================
+// LÓGICA DE BÚSQUEDAS AVANZADAS
+// ==========================================
 const opcionesBusqueda = [
   { title: 'Buscar Tareas (por etiquetas)', value: 'tareas' },
   { title: 'Buscar Usuarios (por etiquetas)', value: 'usuarios' },
@@ -258,6 +295,14 @@ const resultados = ref([])
 const cargandoBusqueda = ref(false)
 
 const ejecutarBusqueda = async () => {
+  // Validación de que hayan seleccionado algo
+  if ((tipoBusqueda.value === 'tareas' || tipoBusqueda.value === 'usuarios') && tagsSeleccionados.value.length === 0) {
+    return alert('Por favor, selecciona al menos una etiqueta.')
+  }
+  if (tipoBusqueda.value === 'etiquetas' && usuariosSeleccionados.value.length === 0) {
+    return alert('Por favor, selecciona al menos un usuario.')
+  }
+
   cargandoBusqueda.value = true
   resultados.value = []
   try {
@@ -284,7 +329,6 @@ const ejecutarBusqueda = async () => {
   }
 }
 
-// Cargar datos al montar el componente
 onMounted(() => {
   cargarUsuarios()
   cargarTags()

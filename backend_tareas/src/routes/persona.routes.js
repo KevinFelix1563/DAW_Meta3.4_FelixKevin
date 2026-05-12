@@ -8,7 +8,8 @@ const router = express.Router();
 router.get('/', verificarToken, esAdmin, pc.obtenerTodas);
 router.post('/registro', verificarToken, esAdmin, pc.registro);
 router.put('/:id', verificarToken, esAdmin, pc.modificar);
-router.patch('/:id/estado', verificarToken, esAdmin, pc.cambiarEstado); 
+router.patch('/:id/estado', verificarToken, esAdmin, pc.cambiarEstado);
+router.delete('/:id', verificarToken, esAdmin, pc.eliminar);
 
 // Esta consulta la puede hacer cualquiera, la dejamos solo con verificarToken
 router.get('/:id/tags', verificarToken, pc.obtenerTagsDePersona); 

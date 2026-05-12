@@ -81,3 +81,16 @@ export const obtenerTagsDePersona = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+export const eliminar = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const eliminados = await Persona.destroy({ where: { id } });
+    
+    if (eliminados === 0) return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    
+    res.json({ success: true, message: 'Usuario eliminado permanentemente' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

@@ -6,11 +6,11 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser'; // Importar cookie-parser
 
-
+import authRoutes from './routes/auth.routes.js'; // Importar las rutas de autenticacion
 import tareaRoutes from './routes/tarea.routes.js';
 import personaRoutes from './routes/persona.routes.js';
 import tagRoutes from './routes/tag.routes.js';
-import authRoutes from './routes/auth.routes.js'; // Importar las rutas de autenticacion
+import adminRoutes from './routes/admin.routes.js';
 import { verificarToken } from './middleware/auth.js'; // Importar middleware de autenticacion
 
 
@@ -62,6 +62,7 @@ app.get('/', (req, res) => {
 app.use('/api/personas', personaRoutes);
 app.use('/api/tareas', tareaRoutes);
 app.use('/api/tags', tagRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Middleware para manejar rutas no encontradas
 app.use((req, res) => {
