@@ -89,73 +89,60 @@ Demostración de consulta de Tareas por Etiqueta, en este caso TagId=1 o Urgente
 Interfaz de documentación generada.
 ![Interfaz de documentación generada.](screenshots/03-swagger-ui.png)
 
-## Evidencias de Ejecución de Frontend en PlayWright
+
+# Evidencias de Ejecución de Frontend en PlayWright
 
 Para asegurar la calidad y el cumplimiento estricto de la rúbrica, se desarrollaron suites de pruebas automatizadas que cubren el 100% de los flujos de la aplicación (Autenticación, Gestión de Usuarios, CRUD de Tareas/Etiquetas y Búsquedas Avanzadas). Todas las pruebas pasan exitosamente.
 
 A continuación, se presenta la evidencia en video de las pruebas End-to-End:
 
-# Evidencias del Sistema
 
-#### Panel de Administración (Gestión y Búsquedas)
+## Panel de Administración (Gestión y Búsquedas)
 
-##### 1. Listar y Crear un Nuevo Usuario
+### 1. Listar y Crear un Nuevo Usuario
 
 Evidencia de la creación de un usuario desde el panel del Administrador:
 
-<video width="800" controls>
-  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/admin-Panel-de-Administrac-bcacf--usuarios-y-crear-uno-nuevo-chromium/video.webm" type="video/webm">
-</video>
+![Crear Usuario](./frontend_tareas/test-results/admin-Panel-de-Administrac-bcacf--usuarios-y-crear-uno-nuevo-chromium/video.gif)
 
 ---
 
-##### 2. Búsquedas Avanzadas (Admin)
+### 2. Búsquedas Avanzadas (Admin)
 
 Evidencia de consultas cruzadas en la base de datos (Ej. búsqueda de tareas por etiquetas):
 
-<video width="800" controls>
-  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/admin-Panel-de-Administrac-26281--b%C3%BAsquedas-avanzadas-Admin--chromium/video.webm" type="video/webm">
-</video>
+![Búsquedas Avanzadas](./frontend_tareas/test-results/admin-Panel-de-Administrac-26281--búsquedas-avanzadas-Admin--chromium/video.gif)
 
 ---
 
-##### 3. Eliminar un Usuario (Confirmación)
+### 3. Eliminar un Usuario (Confirmación)
 
 Evidencia del borrado de un usuario aceptando el diálogo nativo de confirmación:
 
-<video width="800" controls>
-  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/admin-Panel-de-Administrac-9152c-ario-confirmando-el-dialogo-chromium/video.webm" type="video/webm">
-</video>
+![Eliminar Usuario](./frontend_tareas/test-results/admin-Panel-de-Administrac-9152c-ario-confirmando-el-dialogo-chromium/video.gif)
 
 ---
 
 # Gestión de Tareas (Usuario Regular)
 
-##### 1. Crear una Nueva Tarea
+### 1. Crear una Nueva Tarea
 
 Evidencia de un usuario autenticado agregando exitosamente una tarea a su lista:
 
-<video width="800" controls>
-  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-B%C3%BA-aebf2--Debe-crear-una-nueva-tarea-chromium/video.webm" type="video/webm">
-</video>
+![Crear Tarea](./frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-Bú-aebf2--Debe-crear-una-nueva-tarea-chromium/video.gif)
 
 ---
 
-##### 2. Uso del Buscador por Etiquetas
+### 2. Uso del Buscador por Etiquetas
 
 Evidencia del filtrado en tiempo real de tareas usando múltiples etiquetas:
 
-<video width="800" controls>
-  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-B%C3%BA-5f5b5-r-el-buscador-por-etiquetas-chromium/video.webm" type="video/webm">
-</video>
+![Buscador por Etiquetas](./frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-Bú-5f5b5-r-el-buscador-por-etiquetas-chromium/video.gif)
 
 ---
 
-##### 3. Eliminar una Tarea
+### 3. Eliminar una Tarea
 
 Evidencia de la eliminación limpia de una tarea de la lista:
 
-<video width="800" controls>
-  <source src="https://raw.githubusercontent.com/KevinFelix1563/DAW_Meta3.4_FelixKevin/main/frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-B%C3%BA-88750-be-poder-eliminar-una-tarea-chromium/video.webm" type="video/webm">
-</video>
-```
+![Eliminar Tarea](./frontend_tareas/test-results/tareas-CRUD-de-Tareas-y-Bú-88750-be-poder-eliminar-una-tarea-chromium/video.gif)
