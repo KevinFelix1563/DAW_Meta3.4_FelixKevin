@@ -119,7 +119,7 @@ Evidencia de consultas cruzadas en la base de datos (Ej. búsqueda de tareas por
 
 Evidencia del borrado de un usuario aceptando el diálogo nativo de confirmación:
 
-![Eliminar Usuario](./frontend_tareas/test-results/admin-Panel-de-Administrac-9152c-ario-confirmando-el-dialogo-chromium/video.gif)
+![Eliminar Usuario](./frontend_tareas/test-results/admin-Panel-de-Administrac-9152c-ario-confirmando-el-diálogo-chromium/video.gif)
 
 ---
 
