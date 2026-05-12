@@ -2,27 +2,31 @@
   <v-app>
     <v-app-bar color="primary" density="compact" v-if="autenticado">
       <v-app-bar-title>Gestor de Tareas Seguro</v-app-bar-title>
+      
+      <v-btn to="/tareas" variant="text" class="ml-4">Mis Tareas</v-btn>
+      
+      <v-btn 
+        v-if="usuario?.rol === 'admin'" 
+        to="/admin" 
+        variant="outlined" 
+        color="white" 
+        class="ml-2"
+      >
+        Panel Admin
+      </v-btn>
+
       <v-spacer></v-spacer>
-      <span class="mr-4 text-body-2">{{ usuario?.email }}</span>
+      
+      <span class="mr-4 text-body-2">{{ usuario?.email }} ({{ usuario?.rol }})</span>
+      
       <v-btn variant="text" @click="hacerLogout" :loading="cargandoSalir">
         Salir
       </v-btn>
     </v-app-bar>
 
     <v-main>
-      <v-container max-width="600" class="mt-4">
-        
-        <Login 
-          v-if="!autenticado" 
-          @login-exitoso="configurarSesion" 
-        />
-
-        <ListaTareas 
-          v-else 
-          :csrfToken="csrfToken" 
-          @sesion-expirada="hacerLogout" 
-        />
-
+      <v-container max-width="1200" class="mt-4">
+        <router-view></router-view>
       </v-container>
     </v-main>
   </v-app>
@@ -30,20 +34,12 @@
 
 <script setup>
 import { ref } from 'vue'
-import Login from './components/Login.vue'
-import ListaTareas from './components/ListaTareas.vue'
+import { useRouter } from 'vue-router'
+// Importamos el estado global reactivo
+import { autenticado, usuario, csrfToken, clearAuth } from './store/auth.js'
 
-const autenticado = ref(false)
-const usuario = ref(null)
-const csrfToken = ref('')
+const router = useRouter()
 const cargandoSalir = ref(false)
-
-// Esta función recibe los datos que nos envía el componente Login.vue
-const configurarSesion = (datosLogin) => {
-  autenticado.value = true
-  usuario.value = datosLogin.usuario
-  csrfToken.value = datosLogin.csrfToken
-}
 
 const hacerLogout = async () => {
   cargandoSalir.value = true
@@ -54,9 +50,11 @@ const hacerLogout = async () => {
       credentials: 'include'
     })
     
-    autenticado.value = false
-    usuario.value = null
-    csrfToken.value = ''
+    // Limpiamos el store global
+    clearAuth()
+    
+    // Lo expulsamos a la pantalla de login
+    router.push('/login')
   } catch (error) {
     console.error('Error al salir:', error)
   } finally {
