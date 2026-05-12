@@ -152,7 +152,7 @@ export const googleCallback = async (req, res) => {
     const usuario = await Persona.findOne({ where: { email: userEmail, activo: true } });
 
     if (!usuario) {
-      return res.redirect(`${process.env.CLIENT_URL}/?login=unauthorized`);
+      return res.redirect(`${process.env.CLIENT_URL}/login?login=unauthorized`);
     }
 
     const csrfToken = generarTokenCSRF(); 
@@ -180,10 +180,10 @@ export const googleCallback = async (req, res) => {
       maxAge: parseInt(process.env.COOKIE_MAX_AGE)
     });
 
-    res.redirect(`${process.env.CLIENT_URL}/?login=success&csrf=${csrfToken}`);
+    res.redirect(`${process.env.CLIENT_URL}/login?login=success&csrf=${csrfToken}`);
 
   } catch (error) {
     console.error("Error en el flujo de Google OAuth:", error);
-    res.redirect(`${process.env.CLIENT_URL}/?login=error`);
+    res.redirect(`${process.env.CLIENT_URL}/login?login=error`);
   }
 };
