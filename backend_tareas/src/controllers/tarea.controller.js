@@ -1,13 +1,13 @@
 import db from '../../models/index.cjs';
+import { Op } from 'sequelize'; // Para búsquedas avanzadas
 
 const { Tarea, Persona, Tag } = db;
 
-// 1. OBTENER TODAS LAS TAREAS
 export const obtenerTodas = async (req, res) => {
   try {
     const tareas = await Tarea.findAll({
+      where: { personaId: req.usuario.id }, //Solo tareas de usuario
       include: [
-        { model: Persona, as: 'autor', attributes: ['id', 'nombre', 'email'] },
         { model: Tag, as: 'etiquetas', attributes: ['id', 'nombre'], through: { attributes: [] } }
       ]
     });
@@ -17,29 +17,32 @@ export const obtenerTodas = async (req, res) => {
   }
 };
 
-// 2. CREAR TAREA
 export const crear = async (req, res) => {
   try {
-    const { titulo, descripcion, completada, personaId } = req.body;
+    const { titulo, descripcion, completada } = req.body;
     
-    if (!titulo || !personaId) {
-      return res.status(400).json({ success: false, message: 'El título y el personaId son obligatorios' });
-    }
+    if (!titulo) return res.status(400).json({ success: false, message: 'El título es obligatorio' });
 
-    const nuevaTarea = await Tarea.create({ titulo, descripcion, completada, personaId });
+    // Asignamos la tarea automáticamente a quien hizo la petición
+    const nuevaTarea = await Tarea.create({ 
+      titulo, 
+      descripcion, 
+      completada, 
+      personaId: req.usuario.id 
+    });
     res.status(201).json({ success: true, data: nuevaTarea });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error al crear la tarea', error: error.message });
   }
 };
 
-// 3. ACTUALIZAR TAREA
 export const actualizar = async (req, res) => {
   try {
     const { id } = req.params;
-    const tarea = await Tarea.findByPk(id);
+    // Aseguramos que la tarea exista Y sea del usuario actual
+    const tarea = await Tarea.findOne({ where: { id, personaId: req.usuario.id } });
     
-    if (!tarea) return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
+    if (!tarea) return res.status(404).json({ success: false, message: 'Tarea no encontrada o acceso denegado' });
 
     await tarea.update(req.body);
     res.json({ success: true, message: 'Tarea actualizada', data: tarea });
@@ -48,13 +51,13 @@ export const actualizar = async (req, res) => {
   }
 };
 
-// 4. ELIMINAR TAREA
 export const eliminar = async (req, res) => {
   try {
     const { id } = req.params;
-    const eliminados = await Tarea.destroy({ where: { id } });
+    // Solo borra si el ID coincide Y le pertenece al usuario
+    const eliminados = await Tarea.destroy({ where: { id, personaId: req.usuario.id } });
 
-    if (eliminados === 0) return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
+    if (eliminados === 0) return res.status(404).json({ success: false, message: 'Tarea no encontrada o acceso denegado' });
 
     res.json({ success: true, message: 'Tarea eliminada permanentemente' });
   } catch (error) {
@@ -62,14 +65,13 @@ export const eliminar = async (req, res) => {
   }
 };
 
-
-// 5. ASOCIAR TAREA CON TAG
 export const agregarTag = async (req, res) => {
   try {
     const { id } = req.params;
     const { tagId } = req.body;
 
-    const tarea = await Tarea.findByPk(id);
+    // Solo puede etiquetar sus propias tareas
+    const tarea = await Tarea.findOne({ where: { id, personaId: req.usuario.id } });
     const tag = await Tag.findByPk(tagId);
 
     if (!tarea || !tag) return res.status(404).json({ success: false, message: 'Tarea o Tag no encontrado' });
@@ -81,17 +83,22 @@ export const agregarTag = async (req, res) => {
   }
 };
 
-// 6. BUSCAR TAREAS POR TAG
-export const tareasPorTag = async (req, res) => {
+// Buscar por una o varias etiquetas
+export const buscarMisTareasPorEtiquetas = async (req, res) => {
   try {
-    const { tagId } = req.params;
-    const tag = await Tag.findByPk(tagId, {
-      include: [{ model: Tarea, as: 'tareas' }]
-    });
+    const { tagsIds } = req.body; // Array de IDs de tags [1, 2]
 
-    if (!tag) return res.status(404).json({ success: false, message: 'Tag no encontrado' });
+    const tareas = await Tarea.findAll({
+      where: { personaId: req.usuario.id },
+      include: [{
+        model: Tag,
+        as: 'etiquetas',
+        where: { id: { [Op.in]: tagsIds } },
+        required: true // Inner join: Fuerza a traer solo tareas que tengan estos tags
+      }]
+    });
     
-    res.json({ success: true, data: tag.tareas });
+    res.json({ success: true, data: tareas });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error en la búsqueda', error: error.message });
   }

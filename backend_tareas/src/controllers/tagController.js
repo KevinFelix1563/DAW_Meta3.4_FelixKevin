@@ -1,5 +1,5 @@
 import db from '../../models/index.cjs';
-const { Tag, Tarea, Persona } = db;
+const { Tag } = db;
 
 export const obtenerTodos = async (req, res) => {
   try {
@@ -10,27 +10,40 @@ export const obtenerTodos = async (req, res) => {
   }
 };
 
-// Todas las Personas relacionadas con un Tag
-export const obtenerPersonasPorTag = async (req, res) => {
+export const crear = async (req, res) => {
+  try {
+    const { nombre } = req.body;
+    if (!nombre) return res.status(400).json({ success: false, message: 'El nombre es obligatorio' });
+    
+    const nuevoTag = await Tag.create({ nombre });
+    res.status(201).json({ success: true, data: nuevoTag });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const actualizar = async (req, res) => {
   try {
     const { id } = req.params;
-    const tagConTodo = await Tag.findByPk(id, {
-      include: {
-        model: Tarea,
-        as: 'tareas',
-        include: {
-          model: Persona,
-          as: 'autor'
-        }
-      }
-    });
+    const tag = await Tag.findByPk(id);
+    
+    if (!tag) return res.status(404).json({ success: false, message: 'Tag no encontrado' });
+    
+    await tag.update(req.body);
+    res.json({ success: true, data: tag });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 
-    if (!tagConTodo) return res.status(404).json({ success: false, message: 'Tag no encontrado' });
-
-    // Obtenemos los autores únicos que tienen tareas con este tag
-    const personas = [...new Set(tagConTodo.tareas.map(t => t.autor))];
-
-    res.json({ success: true, data: personas });
+export const eliminar = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const eliminados = await Tag.destroy({ where: { id } });
+    
+    if (eliminados === 0) return res.status(404).json({ success: false, message: 'Tag no encontrado' });
+    
+    res.json({ success: true, message: 'Tag eliminado permanentemente' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

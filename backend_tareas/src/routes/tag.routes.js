@@ -1,13 +1,15 @@
 import express from 'express';
 import * as tagController from '../controllers/tagController.js'; 
+import { verificarToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// GET /api/tags - Obtener todos los tags disponibles
-router.get('/', tagController.obtenerTodos);
+// Todas las rutas de tags requieren estar autenticado
+router.use(verificarToken);
 
-// GET /api/tags/:id/personas - RELACIÓN INDIRECTA
-// Obtiene todas las personas que tienen al menos una tarea con este tag específico
-router.get('/:id/personas', tagController.obtenerPersonasPorTag);
+router.get('/', tagController.obtenerTodos);
+router.post('/', tagController.crear);
+router.put('/:id', tagController.actualizar);
+router.delete('/:id', tagController.eliminar);
 
 export default router;

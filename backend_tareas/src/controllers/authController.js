@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs'; // Importamos bcryptjs para leer las contraseñas
 import { google } from 'googleapis';
 import db from '../../models/index.cjs';
 
@@ -18,10 +19,12 @@ const oauth2Client = new google.auth.OAuth2(
 
 export const login = async (req, res) => {
   try {
-    const { email } = req.body;
+    // Extraemos el password del body
+    const { email, password } = req.body;
     
-    if (!email || email.trim() === '') {
-      return res.status(400).json({ error: 'El email es requerido' });
+    // Validamos que ambos campos vengan en la petición
+    if (!email || email.trim() === '' || !password || password.trim() === '') {
+      return res.status(400).json({ error: 'El email y la contraseña son requeridos' });
     }
 
     const usuario = await Persona.findOne({ 
@@ -32,11 +35,19 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Usuario no encontrado o cuenta inactiva' });
     }
     
+    // Verificamos que la contraseña plana coincida con el hash de la BD
+    const passwordValida = await bcrypt.compare(password, usuario.password);
+    if (!passwordValida) {
+      return res.status(401).json({ error: 'Contraseña incorrecta' });
+    }
+    
     const csrfToken = generarTokenCSRF();
     
+    // Agregamos el ROL al payload para proteger rutas después
     const payload = {
       id: usuario.id,
       email: usuario.email,
+      rol: usuario.rol, 
       apiKey: process.env.API_KEY,
       csrfToken: csrfToken
     };
@@ -56,9 +67,10 @@ export const login = async (req, res) => {
       maxAge: parseInt(process.env.COOKIE_MAX_AGE)
     });
     
+    // Mandamos el rol al frontend para que Vue sepa si mostrar el menú de Admin
     res.json({
       mensaje: 'Login exitoso',
-      usuario: { id: payload.id, email: payload.email },
+      usuario: { id: payload.id, email: payload.email, rol: payload.rol },
       csrfToken: csrfToken 
     });
     
@@ -90,9 +102,10 @@ export const logout = (req, res) => {
 
 export const verificarAuth = (req, res) => {
   try {
+    // req.usuario ya trae el rol inyectado por el middleware verificarToken
     res.json({
       autenticado: true,
-      usuario: req.usuario
+      usuario: req.usuario 
     });
   } catch (error) {
     console.error('Error al verificar auth:', error);
@@ -109,11 +122,9 @@ const getOAuthClient = () => {
   );
 };
 
-// Inicio del Flujo OAuth
 export const googleLogin = (req, res) => {
-  const oauth2Client = getOAuthClient(); // Instanciamos el cliente aquí
+  const oauth2Client = getOAuthClient(); 
 
-  // Genera URL de autorización con scopes y prompt consent
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: [
@@ -126,42 +137,36 @@ export const googleLogin = (req, res) => {
   res.json({ url: authUrl }); 
 };
 
-// Procesamiento del Callback
 export const googleCallback = async (req, res) => {
   try {
-    const oauth2Client = getOAuthClient(); // Instanciamos el cliente aquí nuevamente
+    const oauth2Client = getOAuthClient(); 
     const { code } = req.query; 
 
-    // POST /token (intercambia code por tokens)
     const { tokens } = await oauth2Client.getToken(code); 
     oauth2Client.setCredentials(tokens);
 
-    // GET /userinfo (con access_token)
     const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
     const userInfo = await oauth2.userinfo.get(); 
     const userEmail = userInfo.data.email; 
 
-    // Validar en la tabla de usuarios registrados 
     const usuario = await Persona.findOne({ where: { email: userEmail, activo: true } });
 
     if (!usuario) {
-      // Usuario NO autorizado -> REDIRECT a /?login=unauthorized
       return res.redirect(`${process.env.CLIENT_URL}/?login=unauthorized`);
     }
 
-    // Usuario autorizado -> Genera sessionid y csrfToken
     const csrfToken = generarTokenCSRF(); 
+    
     const payload = { 
       id: usuario.id, 
       email: usuario.email,
+      rol: usuario.rol, 
       apiKey: process.env.API_KEY,
       csrfToken: csrfToken
     };
     
-    // Crea JWT con userSession payload
     const tokenJWT = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
     
-    // SET-COOKIE session_token (httpOnly)
     res.cookie('jwt_token', tokenJWT, { 
       httpOnly: true, 
       secure: true, 
@@ -169,14 +174,12 @@ export const googleCallback = async (req, res) => {
       maxAge: parseInt(process.env.COOKIE_MAX_AGE)
     });
     
-    // SET-COOKIE csrf_token
     res.cookie('csrf_token', csrfToken, { 
       secure: true, 
       sameSite: 'none',
       maxAge: parseInt(process.env.COOKIE_MAX_AGE)
     });
 
-    // REDIRECT a /?login=success con csrfToken
     res.redirect(`${process.env.CLIENT_URL}/?login=success&csrf=${csrfToken}`);
 
   } catch (error) {
