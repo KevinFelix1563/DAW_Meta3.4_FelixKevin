@@ -26,34 +26,35 @@ test.describe('CRUD de Tareas y Búsquedas Normales', () => {
   });
 
   test('Debe poder usar el buscador por etiquetas', async ({ page }) => {
-    // Abrimos el select de etiquetas de búsqueda
-    await page.getByLabel('Buscar tareas por etiquetas...').click();
+    await page.getByRole('combobox', { name: 'Buscar tareas por etiquetas...' }).click({ force: true });
     
     // Seleccionamos una etiqueta de la lista desplegable de Vuetify
-    // Asumiendo que la etiqueta "Backend" existe por tus capturas
     await page.getByText('Backend', { exact: true }).click();
     
     // Cerramos el menú presionando Escape
     await page.keyboard.press('Escape');
 
-    // Comprobamos que el filtro se haya aplicado (no haya errores en pantalla)
-    await expect(page.getByText('Mis Tareas')).toBeVisible();
+    // Comprobamos que el filtro se haya aplicado
+    await expect(page.getByText('Mis Tareas').first()).toBeVisible();
   });
 
   test('Debe poder eliminar una tarea', async ({ page }) => {
-    // Creamos una tarea desechable
-    const tareaBorrar = 'Tarea para borrar';
+    // Hacemos que el nombre sea unico usando la fecha y hora
+    const tareaBorrar = `Tarea desechable ${Date.now()}`;
+    
+    // La creamos
     await page.getByLabel('Escribe una nueva tarea...').fill(tareaBorrar);
     await page.getByRole('button', { name: 'Agregar' }).click();
     await expect(page.getByText(tareaBorrar)).toBeVisible();
 
-    // Hacemos clic en el primer botón de eliminar que encuentre en la lista
-    const botonEliminar = page.locator('.mdi-delete').first();
-    await botonEliminar.click();
+    // Buscamos el contenedor específico que tiene nuestro texto único
+    // y hacemos clic en el botón de eliminar que está dentro de esa fila
+    const filaTarea = page.locator('.v-list-item', { hasText: tareaBorrar });
+    await filaTarea.locator('.mdi-delete').click();
 
-    // Verificamos que la tarea ya no exista
+    // Verificamos que esta tarea específica desapareció
     await expect(page.getByText(tareaBorrar)).not.toBeVisible();
-    await page.screenshot({ path: './evidencias/05-lista-tareas.png' });
+    await page.screenshot({ path: './evidencias/05-tareas-lista.png' });
   });
 
 });

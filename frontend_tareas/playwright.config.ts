@@ -25,18 +25,10 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'https://localhost:3001',
-    
-
-    /* Ignorar advertencias de certificados autofirmados (SSL) en localhost */
     ignoreHTTPSErrors: true,
-
-    /* Collect trace when retrying the failed test. */
     trace: 'on-first-retry',
-
-    // Evidencia de fallos
-    screenshot: 'only-on-failure',
+    screenshot: 'only-on-failure'
   },
 
   /* Configure projects for major browsers */

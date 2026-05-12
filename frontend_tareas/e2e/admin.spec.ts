@@ -36,22 +36,16 @@ test.describe('Panel de Administración', () => {
   });
 
   test('Debe ejecutar búsquedas avanzadas (Admin)', async ({ page }) => {
-    // Cambiamos a la pestaña de búsquedas
     await page.getByText('Búsquedas Avanzadas').click();
-
-    // Verificamos que cargue el panel de parámetros
     await expect(page.getByText('Parámetros')).toBeVisible();
 
-    // El combo por defecto dice "Buscar Tareas (por etiquetas)"
-    await page.getByLabel('Selecciona Etiquetas').click();
+    await page.getByRole('combobox', { name: 'Selecciona Etiquetas' }).click({ force: true });
+    
     await page.getByText('Backend', { exact: true }).click();
-    await page.keyboard.press('Escape'); // Cerramos el menú de Vuetify
+    await page.keyboard.press('Escape');
 
     // Ejecutamos la búsqueda
     await page.getByRole('button', { name: 'Buscar' }).click();
-
-    // Verificamos que el cuadro azul de "No hay resultados" cambie, 
-    // o que simplemente la sección de resultados se actualice.
     await expect(page.getByText('Resultados')).toBeVisible();
   });
 
