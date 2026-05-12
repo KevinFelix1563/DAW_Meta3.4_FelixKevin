@@ -209,9 +209,8 @@ const fetchSeguro = async (endpoint, method = 'GET', body = null) => {
   return await res.json()
 }
 
-// ==========================================
-// LÓGICA DE USUARIOS (CRUD COMPLETO)
-// ==========================================
+
+// CRUD Usuario
 const cargarUsuarios = async () => {
   try {
     const res = await fetchSeguro('/personas')
@@ -280,9 +279,7 @@ const eliminarUsuario = async (id) => {
   }
 }
 
-// ==========================================
-// LÓGICA DE BÚSQUEDAS AVANZADAS
-// ==========================================
+// Busquedas avanzadas
 const opcionesBusqueda = [
   { title: 'Buscar Tareas (por etiquetas)', value: 'tareas' },
   { title: 'Buscar Usuarios (por etiquetas)', value: 'usuarios' },
